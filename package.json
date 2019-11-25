@@ -1,0 +1,12 @@
+{
+  "name": "bandcrawl",
+  "version": "1.0.0",
+  "description": "Crawl Bandcamp quickly",
+  "main": "src/index.js",
+  "author": "Auguste Rame",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "node-fetch": "^2.6.0"
+  }
+}
