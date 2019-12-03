@@ -81,16 +81,20 @@ async function getAlbums (options = {
 	
 }
 
-module.exports = {
+if (typeof module !== "undefined") {
 
-	setProxy (_proxy) {
+	module.exports = {
 
-		proxy = _proxy;
+		setProxy (_proxy) {
 
-	},
+			proxy = _proxy;
 
-	standardizeAlbum,
-	getLocations,
-	getAlbums
+		},
+
+		standardizeAlbum,
+		getLocations,
+		getAlbums
+
+	}
 
 }
