@@ -1,3 +1,4 @@
+(() => {
 let proxy = "";
 if (typeof fetch === "undefined") fetch = require("node-fetch");
 
@@ -81,20 +82,87 @@ async function getAlbums (options = {
 	
 }
 
-if (typeof module !== "undefined") {
+async function getPageType (url) {
 
-	module.exports = {
+	let pageSrc = await (await fetch(`${proxy}${url}`)).text();
 
-		setProxy (_proxy) {
+	if (pageSrc.indexOf("var TralbumData =") !== -1) return "album";
+	else if (pageSrc.indexOf("TralbumData =")) return "releases";
 
-			proxy = _proxy;
+}
 
-		},
+function getReleaseListURL (url) {
 
-		standardizeAlbum,
-		getLocations,
-		getAlbums
+	return `${(new URL(url)).origin}/music`;
+
+}
+
+async function getReleases (url) {
+
+	url = getReleaseListURL(url);
+
+}
+
+async function getAlbum (url) {
+
+	let pageSrc = await (await fetch(`${proxy}${url}`)).text();
+
+	let raw = (new Function("return " + pageSrc.slice(pageSrc.indexOf("var TralbumData =") + "var TralbumData =".length, pageSrc.indexOf("if ( window.FacebookData )") - 1).trim().slice(0, -1)))();
+
+	var album = {
+
+		url,
+		title: raw.current.title,
+		artist: raw.artist,
+		
+		description: raw.current.about,
+		publish_date: new Date(raw.current.publish_date),
+		minimum_price: raw.current.minimum_price
 
 	}
 
+	let i = 0;
+
+	album.tracks = raw.trackinfo.map(_ => {
+
+		return {
+
+			album,
+
+			position: i++,
+			title: _.title,
+			file: _.file,
+			isFeatured: _.id === album.featured_track_id,
+			duration: _.duration
+
+		}
+
+	});
+
+	return album;
+
 }
+
+const _ = {
+
+	setProxy (_proxy) {
+
+		proxy = _proxy;
+
+	},
+
+	standardizeAlbum,
+	getLocations,
+	getAlbums,
+
+	getPageType,
+	getReleaseListURL,
+
+	getAlbum
+
+}
+
+if (typeof module !== "undefined") module.exports = _;
+else window.bandcrawl = _;
+
+})();
